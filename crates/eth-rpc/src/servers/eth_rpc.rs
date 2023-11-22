@@ -221,8 +221,8 @@ impl<P: Provider + Send + Sync + 'static> EthApiServer for KakarotEthRpc<P> {
 
         // Get the nonce of the contract account -> a storage variable
         let contract_account = ContractAccountReader::new(starknet_contract_address, &provider);
-        let (_, bytecode) = contract_account.bytecode().await.expect("TODO: replace by err handling");
-        Ok(Bytes::from(bytecode.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>()))
+        let (_, bytecode) = contract_account.bytecode().call().await.expect("TODO: replace by err handling");
+        Ok(Bytes::from(bytecode.0.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>()))
     }
 
     async fn get_logs(&self, filter: Filter) -> Result<FilterChanges> {

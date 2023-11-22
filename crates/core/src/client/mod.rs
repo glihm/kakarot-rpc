@@ -164,7 +164,7 @@ impl<P: Provider + Send + Sync + 'static> KakarotClient<P> {
 
         let proxy = ProxyReader::new(starknet_address, &self.starknet_provider);
 
-        let class_hash = match proxy.get_implementation().await {
+        let class_hash = match proxy.get_implementation().call().await {
             Ok(class_hash) => class_hash,
             // TODO: replace by proper error handling
             // if the contract doesn't exist, we return 0
@@ -174,7 +174,7 @@ impl<P: Provider + Send + Sync + 'static> KakarotClient<P> {
         if class_hash == self.kakarot_contract.contract_account_class_hash {
             // Get the nonce of the contract account -> a storage variable
             let contract_account = ContractAccountReader::new(starknet_address, &self.starknet_provider);
-            let nonce = contract_account.get_nonce().await.expect("TODO: replace by err handling");
+            let nonce = contract_account.get_nonce().call().await.expect("TODO: replace by err handling");
             Ok(Felt252Wrapper::from(nonce).into())
         } else {
             // Get the nonce of the EOA -> the protocol level nonce
@@ -225,6 +225,7 @@ impl<P: Provider + Send + Sync + 'static> KakarotClient<P> {
         let contract_account = ContractAccountReader::new(starknet_contract_address, &self.starknet_provider);
         let storage = contract_account
             .storage(&Uint256 { low: key_low.into(), high: key_high.into() })
+            .call()
             .await
             .expect("TODO: replace by err handling");
 
@@ -459,7 +460,7 @@ impl<P: Provider + Send + Sync + 'static> KakarotClient<P> {
     /// by calling the `get_evm_address` function on the Kakarot contract.
     pub async fn get_evm_address(&self, starknet_address: &FieldElement) -> Result<Address, EthApiError> {
         let contract_account = ContractAccountReader::new(*starknet_address, &self.starknet_provider);
-        let evm_address = contract_account.get_evm_address().await.expect("TODO: replace by err handling");
+        let evm_address = contract_account.get_evm_address().call().await.expect("TODO: replace by err handling");
         let evm_address = Felt252Wrapper::from(evm_address).try_into()?;
         Ok(evm_address)
     }
