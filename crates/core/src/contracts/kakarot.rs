@@ -82,7 +82,8 @@ impl<P: Provider + Send + Sync + 'static> KakarotContract<P> {
         // params
         let return_data = decode_eth_call_return(&result)?;
 
-        let result = Bytes::from(return_data.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>());
+        let result =
+            Bytes::from(return_data.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>());
         Ok(result)
     }
 

@@ -261,9 +261,9 @@ mod tests {
 
         // When
         let (deployed_evm_bytecode_len, deployed_evm_bytecode) =
-            counter_contract.bytecode().await.expect("TODO: replace by err handling");
+            counter_contract.bytecode().call().await.expect("TODO: replace by err handling");
         let deployed_evm_bytecode = Bytes::from(
-            deployed_evm_bytecode.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>(),
+            deployed_evm_bytecode.0.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>(),
         );
 
         // Use genesis_set_bytecode to get the bytecode to be stored into counter
@@ -301,8 +301,10 @@ mod tests {
 
         // Create a new counter contract pointing to the genesis initialized storage
         let counter_genesis = ContractAccountReader::new(counter.evm_address, &starknet_client);
-        let (_, genesis_evm_bytecode) = counter_genesis.bytecode().await.expect("TODO: replace by err handling");
-        let genesis_evm_bytecode = Bytes::from(genesis_evm_bytecode.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>());
+        let (_, genesis_evm_bytecode) = counter_genesis.bytecode().call().await.expect("TODO: replace by err handling");
+        let genesis_evm_bytecode = Bytes::from(
+            genesis_evm_bytecode.0.into_iter().filter_map(|x: FieldElement| u8::try_from(x).ok()).collect::<Vec<_>>(),
+        );
 
         // Then
         // Assert that the expected and actual bytecodes are equal
@@ -439,6 +441,7 @@ mod tests {
         let genesis_contract = ContractAccountReader::new(genesis_address, &starknet_client);
         let storage = genesis_contract
             .storage(&CairoUint256 { low: key_low, high: key_high })
+            .call()
             .await
             .expect("TODO: replace by err handling");
 
